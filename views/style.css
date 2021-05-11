@@ -1,0 +1,53 @@
+body {
+    background: white;
+    width: fit-content;
+    height: fit-content;
+}
+
+h3 {
+    padding: 10px;
+    font-size: 15px;
+    text-align: left;
+}
+
+.container {
+    width: fit-content;
+    height: fit-content;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 30% auto;
+}
+
+.grid-item {
+    font-size: 30px;
+    text-align: center;
+}
+
+.grid-border {
+    border: 1px solid rgba(151, 147, 147, 0.8);
+}
+
+.grid-border-top {
+    border-top: 1px solid rgba(151, 147, 147, 0.8);
+}
+
+.grid-chat {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.scrollbar-user {
+    float: left;
+    height: 550px;
+    background: #f5f5f5;
+    overflow-y: scroll;
+}
+
+.scrollbar-chat {
+    float: left;
+    height: 500px;
+    background: #f5f5f5;
+    overflow-y: scroll;
+}
