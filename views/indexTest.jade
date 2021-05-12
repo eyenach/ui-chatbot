@@ -1,0 +1,44 @@
+html
+    head 
+        title= title 
+        script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous")
+
+        script.
+            $(document).ready(function(){
+                $.ajax({url: "/roboshop/contact", success: function(result){ 
+
+                    for(var i=0;i<result.length;++i){
+                        //test
+                        //- alert(result[i].displayName+i)
+
+                        //create div
+                        $('#contact').append('<div id="'+ result[i].userId +'" onclick="getChat(this.id)">'+ result[i].displayName +'</div>');
+
+                        //- $('#contact').append('<div id="'+ result[i].userId+'" onclick="getChat('+result[i].displayName+')">'+ result[i].displayName +'</div>'); 
+ 
+
+                        //- $("#div"+i).on("click",getChat(this.i))
+                    
+                        //- $("#div"+i).click(function(){
+                        //-     console.log(result[i].userId)
+                        //-     getChat(result[i].userId);
+                        //-     //- alert("The paragraph was clicked.");
+                        //- });
+
+                    }
+
+                    //add div => div id for loop
+
+
+                }});
+            });
+
+            function getChat(id){
+                //ajax
+                //- console.log(id)
+                alert(id)
+            }
+
+    body 
+        p Contact     
+        div(id="contact")
