@@ -25,6 +25,9 @@ app.get("/roboshop/admin", async(req, res) => {
     res.render('indexTest', {
         title: 'roboshop'
     });
+    // res.render('index', {
+    //     title: 'roboshop'
+    // });
 });
 
 

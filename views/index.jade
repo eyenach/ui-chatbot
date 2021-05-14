@@ -1,0 +1,115 @@
+html
+    head
+        link(rel="stylesheet", type="text/css", href="/style.css")
+        link(rel="stylesheet", type="text/css", href="/flex2html.css")
+        script(type="text/javascript" src="/flex2html.min.js")
+        script(src="https://code.jquery.com/jquery-3.5.0.js")
+        script.
+            $(document).ready(function(){
+                $.ajax({url: "/roboshop/contact", success: function(result){ 
+
+                    for(var i=0;i<result.length;++i){
+                        //test
+                        //- alert(result[i].displayName+i)
+                        $('#contact').remove();
+                        //create div
+                        $('#contact-line').append('<div id="'+ result[i].userId +'" class="grid-item grid-border-top" onclick="logHistory(this.id)">'+ result[i].userId +'</div>');
+                        //- $('#contact').append('<div id="'+ result[i].userId+'" onclick="getChat('+result[i].displayName+')">'+ result[i].displayName +'</div>'); 
+ 
+
+                        //- $("#div"+i).on("click",getChat(this.i))
+                    
+                        //- $("#div"+i).click(function(){
+                        //-     console.log(result[i].userId)
+                        //-     getChat(result[i].userId);
+                        //-     //- alert("The paragraph was clicked.");
+                        //- });
+
+                    }
+
+                    //add div => div id for loop
+
+                }});
+            });
+
+            function logHistory(id){
+                $.ajax({
+                    method:"get",
+                    url:'/roboshop/chat/userId/' + id,
+                    success:function(data){
+                        var res_message;
+                        $("#flex").remove();
+                        $("#flex-line").append('<div id="flex"></div>');
+                        for (let i = 0; i < data.length; i++) {
+                            //- query that client's req
+                            flex2html("flex", {
+                                "type": "flex",
+                                "altText": "Flex Message",
+                                "contents": {
+                                    "type": "bubble",
+                                    "body": {
+                                        "type": "box",
+                                        "layout": "vertical",
+                                        "contents": [
+                                        {
+                                             "type": "text",
+                                            "text": data[i].query,
+                                            "weight": "bold",
+                                            "size": "sm",
+                                            "margin": "none"
+                                        }
+                                        ]
+                                    },
+                                    "custom": "rtl"
+                                },
+                                "direction": "rtl"
+                            });
+
+                            //- responseMessage that server's res
+                            res_message = data[i].responseMessages;
+                            for (let n = 0; n < res_message.length; n++) {
+                                console.log(res_message[n]);
+                                if (typeof res_message[n] == 'string') {
+                                    flex2html("flex", {
+                                        "type": "flex",
+                                        "altText": "Flex Message",
+                                        "contents": {
+                                            "type": "bubble",
+                                            "body": {
+                                                "type": "box",
+                                                "layout": "vertical",
+                                                "contents": [
+                                                {
+                                                    "type": "text",
+                                                    "text": res_message[n],
+                                                    "weight": "bold",
+                                                    "size": "sm",
+                                                    "margin": "none"
+                                                }
+                                                ]
+                                            },
+                                            "custom": "ltr"
+                                        }
+                                    });
+                                } else {
+                                    flex2html("flex", res_message[n].payload);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+    body
+        h1 The grid-row-gap Property:
+        div(class="grid-container")
+            div(id="contact-line" class="grid-item scrollbar-user")
+                //- LOOP DIV for show contacts
+                div(id="contact")
+                div(id="contact" class="grid-item grid-border-top" onClick="logHistory(this.id)")
+            div(class=".grid-item")
+                div(class="grid-item grid-border scrollbar-chat grid-chat")
+                    div(id="flex-line" class="chatbox")
+                        //- FLEX LINE HERE
+                        div(id="flex")
+                div(class="grid-item grid-border")
+                    h3 text
