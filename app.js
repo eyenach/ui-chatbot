@@ -34,13 +34,74 @@ app.get('/roboshop/contact', async (req, res) => {
     //find => select * from db1 where userId = 1
     //project => select userId , displayName from db1
 
-    db.collection("chatMessege1").find().project({ _id:0 , userId:1 , displayName:1 , date:1}).toArray(
-        function(err, result) {
-            console.log("dwsfda ",result)
-            res.json(result)
-            dbF.close()
+
+    // db.collection("chatMessege1").find({ "date": { $gte: new Date("2021-04-30T00:00:00Z")}}).project({ _id:0 , userId:1 , displayName:1 , date:1}).toArray(
+    //     function(err, result) {
+    //         console.log("dwsfda ",result)
+    //         res.json(result)
+    //         dbF.close()
+    //     }
+    // );
+
+
+    // db.collection('chatMessege1').aggregate([
+    //     {
+    //         $match: { date: {$gte: new Date("2021-04-30T00:00:00Z")}} 
+    //     }
+    // ]).toArray(
+    //     function(err, result) {
+    //         console.log("dwsfda ",result)
+    //         // res.json(result)
+    //         // dbF.close()
+    //     }
+    //  )
+
+    // let t = await db.collection('chatMessege1').aggregate([
+
+    //         { $match: { date: {$gte: new Date("2021-03-30T00:00:00Z")}}},
+    //         { $sort: {date:-1}},
+    //         { $group: {_id: "$userId"}}
+
+    // ]).toArray()
+
+    let t = await db.collection('chatMessege1').aggregate([
+
+        { $match: { 
+            date: {$gte: new Date("2021-03-30T00:00:00Z")}
+            }
         }
-    );
+        
+        ,{ $group: { 
+
+           _id : '$userId',
+           userId : { $addToSet: '$userId' },
+           displayName : { $addToSet: '$displayName' },
+           date : { $max: '$date' }
+
+           }
+        }
+        ,{ $sort: { 
+            date:-1 
+         } 
+        }
+
+    ]).toArray()
+    
+    console.log("frwf ",t ) 
+
+    res.json(t)
+
+
+   
+    //  db.restaurants.aggregate(
+    //     [
+    //       { $sort : { borough : 1 } }
+    //     ]
+    //  )
+
+
+    //  console.log("ttt ",t)
+
     // res.json({"contact":["Shop","Eye"]});
 })
 
