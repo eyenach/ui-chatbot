@@ -175,7 +175,7 @@ strong {
     -webkit-box-flex: 1;
     flex: 1 0 0;
     flex-basis: auto;
-    /* text-align: left; */
+    text-align: left;
 }
 
 .LyGi .T1 {
