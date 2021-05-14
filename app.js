@@ -4,7 +4,9 @@ var path = require('path')
 
 // connect database
 let db;
+let col_name = 'chatmessage';
 var dbF = require('./db.js');
+
 (async function() {
     db = await dbF.init();
 })();
@@ -18,26 +20,60 @@ app.set('view engine', 'jade')
 // app.use('/', indexRouter)
 // app.use('/roboshop', roboRouter)
 
-app.get('/roboshop/admin', (req, res) => {
-    res.render('index', {
-        message: 'This is message sent from app.js'
-    })
-})
-
-app.get("/roboshop/contacts", async(req, res) => {
-    let result = await db.collection("chatmessage").find().toArray();
-    res.render('index', {
-            message: result[0]
-                // contacts: result
-        })
-        // db.collection("chatMessege1").find().toArray(function(err, result) {
-        //     // res.send(result)
-        //     res.render('index', {message: result[2].userId})
-        //     dbF.close()
-        //     });
-        // let result = await db.collection('chatmessage').findOne({ userId: "xxyyzz" });
-        // res.json(result);
+//start 
+app.get("/roboshop/admin", async(req, res) => {
+    res.render('indexTest', {
+        title: 'roboshop'
+    });
 });
+
+
+//contact
+app.get('/roboshop/contact', async(req, res) => {
+
+    // db.collection("chatMessege1").find({ "date": { $gte: new Date("2021-04-30T00:00:00Z")}}).project({ _id:0 , userId:1 , displayName:1 , date:1}).toArray(
+    //     function(err, result) {
+    //         console.log("dwsfda ",result)
+    //         res.json(result)
+    //         dbF.close()
+    //     }
+    // );
+
+
+    // db.collection('chatMessege1').aggregate([
+    //     {
+    //         $match: { date: {$gte: new Date("2021-04-30T00:00:00Z")}} 
+    //     }
+    // ]).toArray(
+    //     function(err, result) {
+    //         console.log("dwsfda ",result)
+    //         // res.json(result)
+    //         // dbF.close()
+    //     }
+    //  )
+
+    // let t = await db.collection('chatMessege1').aggregate([
+
+    //         { $match: { date: {$gte: new Date("2021-03-30T00:00:00Z")}}},
+    //         { $sort: {date:-1}},
+    //         { $group: {_id: "$userId"}}
+
+    // ]).toArray()
+
+    let t = await db.collection(col_name).aggregate([
+
+        { $match: { date: { $gte: new Date("2021-04-30T00:00:00Z") } } },
+        { $group: { _id: '$userId', userId: { $addToSet: '$userId' }, date: { $max: '$date' } } },
+        { $sort: { date: -1 } },
+        { $project: { _id: 0, userId: 1, date: 1 } }
+
+    ]).toArray()
+
+    console.log("test ", t)
+
+    res.json(t)
+
+})
 
 app.get("/roboshop/chat/userId/:userId", async(req, res) => {
     let userId = req.params.userId;
@@ -47,7 +83,7 @@ app.get("/roboshop/chat/userId/:userId", async(req, res) => {
     let project = { _id: 0, query: 1, responseMessages: 1 }
         // let group = { _id: { date: "$date", userId: "$userId", query: "$query", responseMessages: "$responseMessages" } };
     let sort = { date: 1 };
-    let result = await db.collection('chatmessage').aggregate(
+    let result = await db.collection(col_name).aggregate(
         [
             { $match: match },
             { $project: project },
@@ -61,8 +97,6 @@ app.get("/roboshop/chat/userId/:userId", async(req, res) => {
     res.json(result);
 })
 
-app.listen(8080, () => {
-    console.log(`Server is running on port : 8080`)
-})
+app.listen(8080, () => { console.log(`Server is running on port : 8080`) })
 
 module.exports = app
