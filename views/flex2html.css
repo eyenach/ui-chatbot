@@ -51,6 +51,22 @@ strong {
     font-weight: bold;
 }
 
+.timeSent-rtl {
+    font-size: 13px;
+    margin: 2px 7px 0 0;
+    float: right;
+}
+
+.timeSent-ltr {
+    font-size: 13px;
+    margin: 2px 0 0 7px;
+    float: left;
+}
+
+.showDate {
+    justify-content: center;
+}
+
 .LySlider {
     overflow: hidden;
     overflow-x: scroll;
@@ -478,6 +494,12 @@ strong {
 .T1.fxRTL.msg-box-rtl {
     flex: 0 0 auto !important;
     background-color: #00c300;
+    color: white;
+}
+
+.T1.fxDATE.msg-box-date {
+    flex: 0 0 auto !important;
+    background-color: rgba(0, 0, 0, 0.3);
     color: white;
 }
 

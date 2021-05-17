@@ -22,12 +22,12 @@ app.set('view engine', 'jade')
 
 //start 
 app.get("/roboshop/admin", async(req, res) => {
-    res.render('indexTest', {
-        title: 'roboshop'
-    });
-    // res.render('index', {
+    // res.render('indexTest', {
     //     title: 'roboshop'
     // });
+    res.render('index', {
+        title: 'roboshop'
+    });
 });
 
 
@@ -83,7 +83,7 @@ app.get("/roboshop/chat/userId/:userId", async(req, res) => {
     console.log("GET: /roboshop/chat/userId/" + userId);
 
     let match = { "userId": userId };
-    let project = { _id: 0, query: 1, responseMessages: 1 }
+    let project = { _id: 0, query: 1, responseMessages: 1, date: 1 }
         // let group = { _id: { date: "$date", userId: "$userId", query: "$query", responseMessages: "$responseMessages" } };
     let sort = { date: 1 };
     let result = await db.collection(col_name).aggregate(

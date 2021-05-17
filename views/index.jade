@@ -37,10 +37,45 @@ html
                     method:"get",
                     url:'/roboshop/chat/userId/' + id,
                     success:function(data){
-                        var res_message;
+                        var res_message, temp_date, data_date, isoDate, newDate, time;
                         $("#flex").remove();
+                        //- $("#date").remove();
                         $("#flex-line").append('<div id="flex"></div>');
                         for (let i = 0; i < data.length; i++) {
+                            //- set date
+                            isoDate = data[i].date;
+                            newDate = new Date(isoDate);
+                            data_date = isoDate.match(/\d\d\d\d-\d\d-\d\d/)[0];
+                            
+                            if (temp_date == null || data_date > temp_date){
+                                temp_date = data_date;
+                                flex2html("flex", {
+                                    "type": "flex",
+                                    "altText": "Flex Message",
+                                    "contents": {
+                                        "type": "bubble",
+                                        "body": {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [
+                                            {
+                                                "type": "text",
+                                                "text": temp_date,
+                                                "weight": "bold",
+                                                "size": "sm",
+                                                "margin": "none"
+                                            }
+                                            ]
+                                        },
+                                        "custom": "date"
+                                    },
+                                    "direction": "date"
+                                });
+                            }
+
+                            //- set time
+                            time = newDate.getHours() + ':' + newDate.getMinutes();
+
                             //- query that client's req
                             flex2html("flex", {
                                 "type": "flex",
@@ -64,7 +99,7 @@ html
                                 },
                                 "direction": "rtl"
                             });
-
+                            $("#flex").append('<div id="date" class="LySlider timeSent-rtl">' + time + '</div><br><br>');
                             //- responseMessage that server's res
                             res_message = data[i].responseMessages;
                             for (let n = 0; n < res_message.length; n++) {
@@ -94,6 +129,7 @@ html
                                 } else {
                                     flex2html("flex", res_message[n].payload);
                                 }
+                                $("#flex").append('<div id="date" class="LySlider timeSent-ltr">' + time + '</div><br><br>');
                             }
                         }
                     }
