@@ -4,7 +4,7 @@ var path = require('path')
 
 // connect database
 let db;
-let col_name = 'chatmessage';
+let col_name = 'chatMessege1';
 var dbF = require('./db.js');
 
 (async function() {
@@ -22,59 +22,49 @@ app.set('view engine', 'jade')
 
 //start 
 app.get("/roboshop/admin", async(req, res) => {
-    res.render('indexTest', {
+    res.render('index', {
         title: 'roboshop'
     });
-    // res.render('index', {
-    //     title: 'roboshop'
-    // });
 });
 
 
 //contact
-app.get('/roboshop/contact', async(req, res) => {
+app.get('/roboshop/contact/', async(req, res) => {
+    
+ 
+    let last_date = req.query.lastDateQuery;
 
-    // db.collection("chatMessege1").find({ "date": { $gte: new Date("2021-04-30T00:00:00Z")}}).project({ _id:0 , userId:1 , displayName:1 , date:1}).toArray(
-    //     function(err, result) {
-    //         console.log("dwsfda ",result)
-    //         res.json(result)
-    //         dbF.close()
-    //     }
-    // );
+    let match ;
 
+    if (last_date != null) {
+        match = { date: { $gte: new Date(last_date) , $lt: new Date() } };
+    } 
 
-    // db.collection('chatMessege1').aggregate([
-    //     {
-    //         $match: { date: {$gte: new Date("2021-04-30T00:00:00Z")}} 
-    //     }
-    // ]).toArray(
-    //     function(err, result) {
-    //         console.log("dwsfda ",result)
-    //         // res.json(result)
-    //         // dbF.close()
-    //     }
-    //  )
+    let t = await db.collection(col_name).aggregate([  //edit query
 
-    // let t = await db.collection('chatMessege1').aggregate([
-
-    //         { $match: { date: {$gte: new Date("2021-03-30T00:00:00Z")}}},
-    //         { $sort: {date:-1}},
-    //         { $group: {_id: "$userId"}}
-
-    // ]).toArray()
-
-    let t = await db.collection(col_name).aggregate([
-
-        { $match: { date: { $gte: new Date("2021-04-30T00:00:00Z") } } },
-        { $group: { _id: '$userId', userId: { $addToSet: '$userId' }, date: { $max: '$date' } } },
+        { $match: {} }, 
+        { $group: { _id: '$userId', userId: { $first: '$userId' }, date: { $max: '$date' } } },
         { $sort: { date: -1 } },
-        { $project: { _id: 0, userId: 1, date: 1 } }
+        { $project: { _id: 0, userId: 1 } }
 
     ]).toArray()
 
-    console.log("test ", t)
+    console.log(t)
 
-    res.json(t)
+
+    // //find date now (!= local)
+    let date_now = new Date()
+    // console.log("date_now ",date_now)
+    
+
+
+    let result = { lastDateQuery: date_now , contact : t } ;
+    
+    // t.last_date = last_date
+
+    console.log("test ", result)
+
+    res.json(result)
 
 })
 
