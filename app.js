@@ -69,11 +69,22 @@ app.get('/roboshop/contact/', async(req, res) => {
 })
 
 app.get("/roboshop/chat/userId/:userId", async(req, res) => {
+    let currentDate = new Date();
+    let lastDateQuery, match_date, last30day;
     let userId = req.params.userId;
-    console.log("GET: /roboshop/chat/userId/" + userId);
+    console.log("GET: /roboshop/chat/userId/" + userId + "?lastDateQuery=" + req.query.lastDateQuery);
 
-    let match = { "userId": userId };
-    let project = { _id: 0, query: 1, responseMessages: 1 }
+    if (req.query.lastDateQuery == 'null') {
+        last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
+        match_date = { $gte: last30day, $lt: currentDate }
+    } else {
+        lastDateQuery = new Date(req.query.lastDateQuery);
+        match_date = { $gte: lastDateQuery, $lt: currentDate }
+    }
+
+    let match = { "userId": userId, "date": match_date }
+    console.log("match: ", match);
+    let project = { _id: 0, query: 1, responseMessages: 1, date: 1 }
         // let group = { _id: { date: "$date", userId: "$userId", query: "$query", responseMessages: "$responseMessages" } };
     let sort = { date: 1 };
     let result = await db.collection(col_name).aggregate(
@@ -86,7 +97,8 @@ app.get("/roboshop/chat/userId/:userId", async(req, res) => {
         ]
     ).toArray();
 
-    console.log("result: ", result);
+    result.splice(0, 0, { "lastDateQuery": currentDate });
+    console.log("result: ", result.length, " => ", result);
     res.json(result);
 })
 

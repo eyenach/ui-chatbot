@@ -3,6 +3,8 @@ function flex2html(element, json) {
     let carousel;
     if (json['direction'] === undefined) {
         carousel = carousel_struc()
+    } else if (json['direction'] === 'date') {
+        carousel = carousel_struc_date()
     } else {
         carousel = carousel_struc_text()
     }
@@ -59,6 +61,8 @@ function bubble_object(json) {
 
     if (json['custom'] === undefined) {
         bubble = bubble_struc(json)
+    } else if (json['custom'] === 'date') {
+        bubble = bubble_struc_date(json)
     } else {
         bubble = bubble_struc_text(json)
     }
@@ -696,11 +700,15 @@ function span_object(json) {
 }
 
 function carousel_struc() {
-    return `<div class="LySlider"><div class="lyInner"><!-- inner --></div></div><br>`
+    return `<div class="LySlider"><div class="lyInner"><!-- inner --></div></div>`
+}
+
+function carousel_struc_date() {
+    return `<div class="LySlider" dir="rtl"><div class="lyInner showDate"><!-- inner --></div></div>`
 }
 
 function carousel_struc_text() {
-    return `<div class="LySlider" dir="rtl"><div class="lyInner"><!-- inner --></div></div><br>`
+    return `<div class="LySlider" dir="rtl"><div class="lyInner"><!-- inner --></div></div>`
 }
 
 function bubble_struc(json) {
@@ -710,6 +718,16 @@ function bubble_struc(json) {
     size = upper2digit(size)
 
     return `<div class="lyItem Ly${size}"><div class="T1 fx${direction.toUpperCase()}" dir="${direction}"><!-- hero --><!-- header --><!-- body --><!-- footer --></div></div>`
+}
+
+function bubble_struc_date(json) {
+    let { size, direction, action, custom } = json
+    size = (!size || size === '') ? 'medium' : size
+    direction = custom
+    custom = custom
+    size = upper2digit(size)
+
+    return `<div class="lyItem Ly${size} showDate"><div class="T1 fx${direction.toUpperCase()} msg-box-${custom}"><!-- hero --><!-- header --><!-- body --><!-- footer --></div></div>`
 }
 
 function bubble_struc_text(json) {
