@@ -38,16 +38,19 @@ html
 
                     for(var i=0;i<contact_result.contact.length;++i){
 
+                        let thisContact = contact_result.contact[i];
+
                         //ajax
-                        $.ajax({url: "/roboshop/chat/userId/:userId/?lastDateQuery="+c_contact+"&select=count", success: function(result){
+                        $.ajax({url: "/roboshop/chat/userId/"+thisContact+"/?lastDateQuery="+c_contact+"&select=count", success: function(result){
                             //doing here
 
                             //- let count_unread = result.count;
+                            console.log("count_unread ",result[0].count)
     
                             $('#contact').remove();
                             //create div                                                                                                                                //userId (?) " "+count_unread[i]+
-                            $('#contact-line').append('<div id="'+ contact_result.contact[i] +'" class="grid-item grid-border-top" onclick="logHistory(this.id)">'+ contact_result.contact[i] +'</div>');
-                            console.log("result contact ",contact_result.contact[i])
+                            $('#contact-line').append('<div id="'+ thisContact +'" class="grid-item grid-border-top" onclick="logHistory(this.id)">'+ thisContact +" ("+result[0].count+")"+'</div>');
+                            console.log("result contact ",thisContact)
                             //- $('#contact').append('<div id="'+ result[i].userId+'" onclick="getChat('+result[i].displayName+')">'+ result[i].displayName +'</div>'); 
 
                         }});
