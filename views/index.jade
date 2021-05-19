@@ -6,7 +6,20 @@ html
         script(src="https://code.jquery.com/jquery-3.5.0.js")
         script.
             $(document).ready(function(){
-                $.ajax({url: "/roboshop/contact", success: function(result){ 
+
+                //query last_date.local html5
+                //- let lastDate;
+
+                let date  = localStorage.getItem('lastDateQuery');
+
+
+                $.ajax({url: "/roboshop/contact/?lastDateQuery="+date, success: function(result){ 
+
+
+                    let r = result.lastQueryDate;
+
+                    localStorage.setItem('lastDateQuery',r); //r = date.now
+
 
                     for(var i=0;i<result.length;++i){
                         //test
@@ -16,18 +29,9 @@ html
                         $('#contact-line').append('<div id="'+ result[i].userId +'" class="grid-item grid-border-top" onclick="logHistory(this.id)">'+ result[i].userId +'</div>');
                         //- $('#contact').append('<div id="'+ result[i].userId+'" onclick="getChat('+result[i].displayName+')">'+ result[i].displayName +'</div>'); 
  
-
-                        //- $("#div"+i).on("click",getChat(this.i))
-                    
-                        //- $("#div"+i).click(function(){
-                        //-     console.log(result[i].userId)
-                        //-     getChat(result[i].userId);
-                        //-     //- alert("The paragraph was clicked.");
-                        //- });
-
                     }
 
-                    //add div => div id for loop
+                  
 
                 }});
             });
