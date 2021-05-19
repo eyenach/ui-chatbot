@@ -4,7 +4,8 @@ var path = require('path')
 
 // connect database
 let db;
-let col_name = 'chatMessege1';
+// let col_name = 'chatMessege1';
+let col_name = 'chatmessage';
 var dbF = require('./db.js');
 
 (async function() {
@@ -30,45 +31,45 @@ app.get("/roboshop/admin", async(req, res) => {
 
 //contact
 app.get('/roboshop/contacts/', async(req, res) => {
-    
- 
+
+
     let lastDate = req.query.lastDateQuery
     let currentDate = new Date()
 
-    let match = {} ; //{date: {$gte: new Date("2021-03-30 02:10:11.795Z")}}
+    let match = {}; //{date: {$gte: new Date("2021-03-30 02:10:11.795Z")}}
 
     if (lastDate != null) {
-        match = { date: { $gte: new Date(lastDate) , $lt: currentDate } }; //between
-    } 
+        match = { date: { $gte: new Date(lastDate), $lt: currentDate } }; //between
+    }
 
-    let result = await db.collection(col_name).aggregate([  //edit query
+    let result = await db.collection(col_name).aggregate([ //edit query
 
-        { $match: match }, 
+        { $match: match },
         { $group: { _id: '$userId', userId: { $first: '$userId' }, date: { $max: '$date' } } },
         { $sort: { date: -1 } },
         { $project: { _id: 0, userId: 1 } }
 
     ]).toArray()
 
-    let map_result =  result.map(function (obj) {
+    let map_result = result.map(function(obj) {
         return obj.userId;
-      });
+    });
 
-    console.log("result contact ",map_result)
+    console.log("result contact ", map_result)
 
-    let final_result = { contact : { lastDateQuery: currentDate , contact : map_result} };
-    
+    let final_result = { contact: { lastDateQuery: currentDate, contact: map_result } };
+
     console.log("final_result ", final_result)
 
     res.json(final_result)
 
 })
 
-app.get("/roboshop/chat/userId/:userId/", async(req, res) => { 
+app.get("/roboshop/chat/userId/:userId/", async(req, res) => {
     let currentDate = new Date();
     let lastDateQuery, match_date, last30day;
     let userId = req.params.userId;
-    console.log("GET: /roboshop/chat/userId/" + userId + "?lastDateQuery=" + req.query.lastDateQuery +"&select=count"); 
+    console.log("GET: /roboshop/chat/userId/" + userId + "?lastDateQuery=" + req.query.lastDateQuery + "&select=count");
 
     if (req.query.lastDateQuery == 'null') {
         last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
