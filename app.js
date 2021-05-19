@@ -82,7 +82,7 @@ app.get("/roboshop/chat/userId/:userId", async(req, res) => {
     let currentDate = new Date();
     let lastDateQuery, match_date, last30day;
     let userId = req.params.userId;
-    console.log("GET: /roboshop/chat/userId/" + userId + "?lastDateQuery=" + req.query.lastDateQuery);
+    // console.log("GET: ", req.baseUrl);
 
     if (req.query.lastDateQuery == 'null') {
         last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
@@ -92,23 +92,44 @@ app.get("/roboshop/chat/userId/:userId", async(req, res) => {
         match_date = { $gte: lastDateQuery, $lt: currentDate }
     }
 
+    // if (req.query.lastDateQuery) {
+    //     lastDateQuery = new Date(req.query.lastDateQuery);
+    //     match_date = { $gte: lastDateQuery, $lt: currentDate }
+    // } else {
+    //     last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
+    //     match_date = { $gte: last30day, $lt: currentDate }
+    // }
+
+    let result;
     let match = { "userId": userId, "date": match_date }
     console.log("match: ", match);
-    let project = { _id: 0, query: 1, responseMessages: 1, date: 1 }
-        // let group = { _id: { date: "$date", userId: "$userId", query: "$query", responseMessages: "$responseMessages" } };
-    let sort = { date: 1 };
-    let result = await db.collection(col_name).aggregate(
-        [
-            { $match: match },
-            { $project: project },
-            // { $group: group },
-            { $sort: sort },
-            { $limit: 30 }
-        ]
-    ).toArray();
 
-    result.splice(0, 0, { "lastDateQuery": currentDate });
-    console.log("result: ", result.length, " => ", result);
+    if (req.query.select == 'count') {
+        result = await db.collection(col_name).aggregate(
+            [
+                { $match: match },
+                { $count: "count" }
+            ]
+        ).toArray();
+        console.log("result count: ", result);
+    } else {
+        let project = { _id: 0, query: 1, responseMessages: 1, date: 1 }
+            // let group = { _id: { date: "$date", userId: "$userId", query: "$query", responseMessages: "$responseMessages" } };
+        let sort = { date: 1 };
+        result = await db.collection(col_name).aggregate(
+            [
+                { $match: match },
+                { $project: project },
+                // { $group: group },
+                { $sort: sort },
+                { $limit: 30 }
+            ]
+        ).toArray();
+
+        result.push({ "lastDateQuery": currentDate });
+        console.log("result: ", result.length, " => ", result);
+    }
+
     res.json(result);
 })
 
