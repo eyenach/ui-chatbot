@@ -57,7 +57,7 @@ app.get('/roboshop/contacts/', async(req, res) => {
 
     console.log("result contact ", map_result)
 
-    let final_result = { contact: { lastDateQuery: currentDate, contact: map_result } };
+    // let final_result = { contact: { lastDateQuery: currentDate, contact: map_result } };
 
     let final_result = { "lastDateQuery": currentDate, "contact": map_result };
 
@@ -69,15 +69,15 @@ app.get('/roboshop/contacts/', async(req, res) => {
 
 app.get("/roboshop/chat/userId/:userId/", async(req, res) => {
     let currentDate = new Date();
-    let lastDateQuery, match_date, last30day;
+    let match_date;
     let userId = req.params.userId;
     console.log("GET: /roboshop/chat/userId/" + userId + "?lastDateQuery=" + req.query.lastDateQuery + "&select=count");
 
     if (req.query.lastDateQuery == 'null') {
-        last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
+        let last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
         match_date = { $gte: last30day, $lt: currentDate }
     } else {
-        lastDateQuery = new Date(req.query.lastDateQuery);
+        let lastDateQuery = new Date(req.query.lastDateQuery);
         match_date = { $gte: lastDateQuery, $lt: currentDate }
     }
 
