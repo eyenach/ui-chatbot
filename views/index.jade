@@ -33,46 +33,120 @@ html
             });
 
             function logHistory(id){
-                // Check browser support
-                let chatlog, chatlog_date, last_querydate = null;
+                let chatlog;
+                let chatlog_date = null
+                let chatlog_chat = [];
+                let query_date = {};
                 if (typeof(Storage) == "undefined") {
                     alert("Sorry, your browser does not support Web Storage...")
                 } else {
+                    //- chatlog_$id = { lastDateQuery, chats }
+                    //- get item from local storage
                     chatlog = localStorage.getItem("chatlog_" + id);
                     if (chatlog) {
-                        chatlog_date = JSON.parse(chatlog);
-                        last_querydate = chatlog_date[0].lastDateQuery;
+                        chatlog_parse = JSON.parse(chatlog);
+                        chatlog_date = chatlog_parse.lastDateQuery;
+                        query_date = { "lastDateQuery": chatlog_date };
+                        if (chatlog_parse.chats){
+                            chatlog_chat = chatlog_parse.chats;
+                        }
                     }
-                    console.log("chatlog: ", last_querydate);
+                    console.log("chatlog_date: ", chatlog_date, " chatlog_chat: ", chatlog_chat.length);
                 }
+
+                let date_query;
                 $.ajax({
                     method:"get",
-                    url:'/roboshop/chat/userId/' + id + '?lastDateQuery=' + last_querydate,
-                    success:function(data){
+                    url:'/roboshop/chat/userId/' + id,
+                    data: query_date,
+                    success:function(response){
+
+                        for (let i = 0; i < response.length; i++){
+                            if (response[i].lastDateQuery) {
+                                date_query = response[i].lastDateQuery;
+                            } else {
+                                chatlog_chat.push(response[i])
+                            }
+                        }
+                        console.log("finished loop: ", chatlog_chat.length);
+
+                        //- set to local storage
+                        let storage = {"lastDateQuery": date_query, "chats": chatlog_chat};
+                        localStorage.setItem("chatlog_" + id, JSON.stringify(storage));
+
+                        //- loop chats in storage
                         let res_message;
-                        let temp_date, data_date, isoDate, newDate, time;
-                        let storage;
+                        let temp_date, data_date, isoDate, newDate, time, min;
                         $("#flex").remove();
                         $("#flex-line").append('<div id="flex"></div>');
-                        for (let i = 0; i < data.length; i++) {
-                            if(data[i].lastDateQuery !== undefined){
-                                if (chatlog == null) { //- add new data to local storage
-                                    storage = data
-                                    localStorage.setItem("chatlog_" + id, JSON.stringify(storage));
-                                } else { //- update data in local storage
-                                    //- storage = localStorage.getItem("chatlog_" + id);
-                                    //- localStorage.setItem("chatlog_" + id, JSON.stringify(storage));
-                                }
-                                //- localStorage.setItem("chatlog_" + id, data[i].lastDateQuery);
-                                console.log("lastDateQuery: ", data[i].lastDateQuery);
-                            } else {
-                                //- set date
-                                isoDate = data[i].date;
-                                newDate = new Date(isoDate);
-                                data_date = isoDate.match(/\d\d\d\d-\d\d-\d\d/);
-                                
-                                if (temp_date == null || data_date > temp_date){
-                                    temp_date = data_date;
+                        for (let i = 0; i < chatlog_chat.length; i++) {
+                            //- set date
+                            isoDate = chatlog_chat[i].date;
+                            newDate = new Date(isoDate);
+                            data_date = isoDate.match(/\d\d\d\d-\d\d-\d\d/);
+                            
+                            if (temp_date == null || data_date > temp_date){
+                                temp_date = data_date;
+                                flex2html("flex", {
+                                    "type": "flex",
+                                    "altText": "Flex Message",
+                                    "contents": {
+                                        "type": "bubble",
+                                        "body": {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [
+                                            {
+                                                "type": "text",                                                    
+                                                "text": temp_date,
+                                                "weight": "bold",
+                                                "size": "sm",
+                                                "margin": "none"
+                                            }
+                                            ]
+                                        },
+                                        "custom": "date"
+                                    },
+                                    "direction": "date"
+                                });
+                            }
+
+                            //- set time
+                            min = newDate.getMinutes();
+                            if(min < 10){
+                                min = '0' + newDate.getMinutes();;
+                            }
+                            time = newDate.getHours() + ':' + min;
+
+                            //- query that client's req
+                            flex2html("flex", {
+                                "type": "flex",
+                                "altText": "Flex Message",
+                                "contents": {
+                                    "type": "bubble",
+                                    "body": {
+                                        "type": "box",
+                                        "layout": "vertical",
+                                        "contents": [
+                                        {
+                                            "type": "text",
+                                            "text": chatlog_chat[i].query,
+                                            "weight": "bold",
+                                            "size": "sm",
+                                            "margin": "none"
+                                        }
+                                        ]
+                                    },
+                                    "custom": "rtl"
+                                },
+                                "direction": "rtl"
+                            });
+                            $("#flex").append('<div id="date" class="LySlider timeSent-rtl">' + time + '</div><br><br>');
+                            //- responseMessage that server's res
+                            res_message = chatlog_chat[i].responseMessages;
+                            for (let n = 0; n < res_message.length; n++) {
+                                console.log(res_message[n]);
+                                if (typeof res_message[n] == 'string') {
                                     flex2html("flex", {
                                         "type": "flex",
                                         "altText": "Flex Message",
@@ -84,81 +158,22 @@ html
                                                 "contents": [
                                                 {
                                                     "type": "text",
-                                                    "text": temp_date,
+                                                    "text": res_message[n],
                                                     "weight": "bold",
                                                     "size": "sm",
                                                     "margin": "none"
                                                 }
                                                 ]
                                             },
-                                            "custom": "date"
-                                        },
-                                        "direction": "date"
+                                            "custom": "ltr"
+                                        }
                                     });
+                                } else {
+                                    flex2html("flex", res_message[n].payload);
                                 }
-
-                                //- set time
-                                time = newDate.getHours() + ':' + newDate.getMinutes();
-
-                                //- query that client's req
-                                flex2html("flex", {
-                                    "type": "flex",
-                                    "altText": "Flex Message",
-                                    "contents": {
-                                        "type": "bubble",
-                                        "body": {
-                                            "type": "box",
-                                            "layout": "vertical",
-                                            "contents": [
-                                            {
-                                                "type": "text",
-                                                "text": data[i].query,
-                                                "weight": "bold",
-                                                "size": "sm",
-                                                "margin": "none"
-                                            }
-                                            ]
-                                        },
-                                        "custom": "rtl"
-                                    },
-                                    "direction": "rtl"
-                                });
-                                $("#flex").append('<div id="date" class="LySlider timeSent-rtl">' + time + '</div><br><br>');
-                                //- responseMessage that server's res
-                                res_message = data[i].responseMessages;
-                                for (let n = 0; n < res_message.length; n++) {
-                                    console.log(res_message[n]);
-                                    if (typeof res_message[n] == 'string') {
-                                        flex2html("flex", {
-                                            "type": "flex",
-                                            "altText": "Flex Message",
-                                            "contents": {
-                                                "type": "bubble",
-                                                "body": {
-                                                    "type": "box",
-                                                    "layout": "vertical",
-                                                    "contents": [
-                                                    {
-                                                        "type": "text",
-                                                        "text": res_message[n],
-                                                        "weight": "bold",
-                                                        "size": "sm",
-                                                        "margin": "none"
-                                                    }
-                                                    ]
-                                                },
-                                                "custom": "ltr"
-                                            }
-                                        });
-                                    } else {
-                                        flex2html("flex", res_message[n].payload);
-                                    }
-                                    $("#flex").append('<div id="date" class="LySlider timeSent-ltr">' + time + '</div><br><br>');
-                                }
+                                $("#flex").append('<div id="date" class="LySlider timeSent-ltr">' + time + '</div><br><br>');
                             }
                         }
-                        //- set item local storage
-
                     }
                 });
             }
