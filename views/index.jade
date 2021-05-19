@@ -31,25 +31,71 @@ html
                 $.ajax({url: "/roboshop/contacts/?lastDateQuery="+c_contact, success: function(result){ 
 
 
-                    let contact_result = result.contact;
-                    console.log("contact_result ",contact_result)
+                    //- contact: {
+                    //-     lastDateQuery: 2021-05-18T07:25:45.720Z,
+                    //-     contact: [ 'shop1', 'nongeye', 'xxyyzz', 'weee', 'earth', 'fdwsfw' ]
+                    //- }
 
-                    localStorage.setItem("contact",JSON.stringify(contact_result)); 
+                    let getContact = localStorage.getItem("contact");
+                    let fetch_contact = JSON.parse(getContact);
 
-                    for(var i=0;i<contact_result.contact.length;++i){
+                
+                    if(!fetch_contact){
 
-                        let thisContact = contact_result.contact[i];
+                        fetch_contact = result
+                        localStorage.setItem("contact",JSON.stringify(fetch_contact)); 
+
+                    }else{
+
+                        for(var i=0;i<result.contact.length;++i){
+                            fetch_contact.contact.push(result.contact[i])
+                        }
+
+                        let lastDate_result = result.lastDateQuery;
+                        let final_result = { "lastDateQuery": lastDate_result , "contact" : fetch_contact.contact } ; 
+
+                        localStorage.setItem("contact",JSON.stringify(final_result)); 
+
+                        console.log("final ",JSON.parse(localStorage.getItem("contact")))
+                    }
+
+
+                    
+
+
+
+
+                    //- let contact_result = result.contact;
+                    //- console.log("contact_result ",contact_result)
+
+                    //- if (contact_result.contact.length == 0){
+                    //-     localStorage.setItem("contact")
+                    //- } else {
+                    //-     localStorage.setItem("contact",JSON.stringify(contact_result)); 
+                    //- }
+
+                    
+
+                    for(var i=0;i<fetch_contact.contact.length;++i){
+
+                        let thisContact = fetch_contact.contact[i];
 
                         //ajax
                         $.ajax({url: "/roboshop/chat/userId/"+thisContact+"/?lastDateQuery="+c_contact+"&select=count", success: function(result){
                             //doing here
 
-                            //- let count_unread = result.count;
-                            console.log("count_unread ",result[0].count)
+                            let count_unread = 0;
+
+                            if(result.length == 0){
+                                console.log("count_unread undefined")
+                            }else{
+                                count_unread = result[0].count
+                                console.log("count_unread ",result[0].count)
+                            }
     
                             $('#contact').remove();
-                            //create div                                                                                                                                //userId (?) " "+count_unread[i]+
-                            $('#contact-line').append('<div id="'+ thisContact +'" class="grid-item grid-border-top" onclick="logHistory(this.id)">'+ thisContact +" ("+result[0].count+")"+'</div>');
+                            //create div                                                                                                                               //+" ("+count_unread+")"
+                            $('#contact-line').append('<div id="'+ thisContact +'" class="grid-item grid-border-top" onclick="logHistory(this.id)">'+ thisContact +" ("+count_unread+")"+'</div>');
                             console.log("result contact ",thisContact)
                             //- $('#contact').append('<div id="'+ result[i].userId+'" onclick="getChat('+result[i].displayName+')">'+ result[i].displayName +'</div>'); 
 

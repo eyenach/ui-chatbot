@@ -56,7 +56,7 @@ app.get('/roboshop/contacts/', async(req, res) => {
 
     console.log("result contact ",map_result)
 
-    let final_result = { contact : { lastDateQuery: currentDate , contact : map_result} };
+    let final_result = { "lastDateQuery": currentDate , "contact" : map_result} ;
     
     console.log("final_result ", final_result)
 
