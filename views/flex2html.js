@@ -704,7 +704,7 @@ function carousel_struc() {
 }
 
 function carousel_struc_date() {
-    return `<div class="LySlider" dir="rtl"><div class="lyInner showDate"><!-- inner --></div></div>`
+    return `<div class="LySlider" dir="rtl"><div class="lyInner showDate"><!-- inner --></div></div><br>`
 }
 
 function carousel_struc_text() {
