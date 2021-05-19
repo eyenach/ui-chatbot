@@ -86,13 +86,14 @@ html
                     console.log("chatlog_date: ", chatlog_date, " chatlog_chat: ", chatlog_chat.length);
                 }
 
-                let date_query;
+                let date_query, chat_length;
                 $.ajax({
                     method:"get",
                     url:'/roboshop/chat/userId/' + id,
                     data: query_date,
                     success:function(response){
 
+                        chat_length = chatlog_chat.length;
                         for (let i = 0; i < response.length; i++){
                             if (response[i].lastDateQuery) {
                                 date_query = response[i].lastDateQuery;
@@ -131,6 +132,32 @@ html
                                             {
                                                 "type": "text",                                                    
                                                 "text": temp_date,
+                                                "weight": "bold",
+                                                "size": "sm",
+                                                "margin": "none"
+                                            }
+                                            ]
+                                        },
+                                        "custom": "date"
+                                    },
+                                    "direction": "date"
+                                });
+                            }
+
+                            //- set unread
+                            if (i == chat_length) {
+                                flex2html("flex", {
+                                    "type": "flex",
+                                    "altText": "Flex Message",
+                                    "contents": {
+                                        "type": "bubble",
+                                        "body": {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [
+                                            {
+                                                "type": "text",                                                    
+                                                "text": "Unread messages below",
                                                 "weight": "bold",
                                                 "size": "sm",
                                                 "margin": "none"
