@@ -7,27 +7,52 @@ html
         script.
             $(document).ready(function(){
 
-                //query last_date.local html5
-                //- let lastDate;
+                //- contact: {
+                //-     lastDateQuery: 2021-05-18T07:25:45.720Z,
+                //-     contact: [ 'shop1', 'nongeye', 'xxyyzz', 'weee', 'earth', 'fdwsfw' ]
+                //- }
 
-                let date  = localStorage.getItem('lastDateQuery');
+                let contact  = localStorage.getItem("contact");
+                let c_contact = null
+
+                if(contact){ //check get contact
+
+                   let getContact = localStorage.getItem("contact");
+                   let getContactjs =  JSON.parse(getContact);
+
+                   console.log("json ",getContactjs)
+
+                    if(getContactjs.lastDateQuery){
+                        c_contact = getContactjs.lastDateQuery
+                    }
+                }
 
 
-                $.ajax({url: "/roboshop/contact/?lastDateQuery="+date, success: function(result){ 
+                $.ajax({url: "/roboshop/contacts/?lastDateQuery="+c_contact, success: function(result){ 
 
 
-                    let r = result.lastQueryDate;
+                    let contact_result = result.contact;
+                    console.log("contact_result ",contact_result)
 
-                    localStorage.setItem('lastDateQuery',r); //r = date.now
+                    localStorage.setItem("contact",JSON.stringify(contact_result)); 
 
+                    for(var i=0;i<contact_result.contact.length;++i){
 
-                    for(var i=0;i<result.length;++i){
-                        //test
-                        //- alert(result[i].displayName+i)
-                        $('#contact').remove();
-                        //create div
-                        $('#contact-line').append('<div id="'+ result[i].userId +'" class="grid-item grid-border-top" onclick="logHistory(this.id)">'+ result[i].userId +'</div>');
-                        //- $('#contact').append('<div id="'+ result[i].userId+'" onclick="getChat('+result[i].displayName+')">'+ result[i].displayName +'</div>'); 
+                        //ajax
+                        $.ajax({url: "/roboshop/chat/userId/:userId/?lastDateQuery="+c_contact+"&select=count", success: function(result){
+                            //doing here
+
+                            //- let count_unread = result.count;
+    
+                            $('#contact').remove();
+                            //create div                                                                                                                                //userId (?) " "+count_unread[i]+
+                            $('#contact-line').append('<div id="'+ contact_result.contact[i] +'" class="grid-item grid-border-top" onclick="logHistory(this.id)">'+ contact_result.contact[i] +'</div>');
+                            console.log("result contact ",contact_result.contact[i])
+                            //- $('#contact').append('<div id="'+ result[i].userId+'" onclick="getChat('+result[i].displayName+')">'+ result[i].displayName +'</div>'); 
+
+                        }});
+                        
+                       
  
                     }
 
