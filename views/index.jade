@@ -95,7 +95,7 @@ html
     
                             $('#contact').remove();
                             //create div                                                                                                                               //+" ("+count_unread+")"
-                            $('#contact-line').append('<div id="'+ thisContact +'" class="grid-item grid-border-top" onclick="logHistory(this.id)">'+ thisContact +" ("+count_unread+")"+'</div>');
+                            $('#contact-line').append('<div id="'+ thisContact +'" class="user-list" onclick="logHistory(this.id)">'+ thisContact +" ("+count_unread+")"+'</div>');
                             console.log("result contact ",thisContact)
                             //- $('#contact').append('<div id="'+ result[i].userId+'" onclick="getChat('+result[i].displayName+')">'+ result[i].displayName +'</div>'); 
 
@@ -256,16 +256,19 @@ html
                 });
             }
     body
-        h1 The grid-row-gap Property:
-        div(class="grid-container")
-            div(id="contact-line" class="grid-item scrollbar-user")
-                //- LOOP DIV for show contacts
-                div(id="contact")
-                div(id="contact" class="grid-item grid-border-top" onClick="logHistory(this.id)")
-            div(class=".grid-item")
-                div(class="grid-item grid-border scrollbar-chat grid-chat")
+        div(class="container")
+
+            div(id="people" class="user scrollbar-user")
+                div(class="user-list user-tag") contacts
+                div(id="contact-line")
+                    //- CONTACT LINE HERE
+                    div(id="contact" class="user-list" onClick="logHistory(this.id)")
+
+            div(class="chat")
+                div(class="log scrollbar-log")
                     div(id="flex-line" class="chatbox")
                         //- FLEX LINE HERE
                         div(id="flex")
-                div(class="grid-item grid-border")
-                    h3 text
+                div(class="message")
+                    textarea
+                    div(class="send") send
