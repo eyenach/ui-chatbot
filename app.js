@@ -4,8 +4,8 @@ var path = require('path')
 
 // connect database
 let db;
-// let col_name = 'chatMessege1';
-let col_name = 'chatmessage';
+let col_name = 'chatMessege1';
+// let col_name = 'chatmessage';
 var dbF = require('./db.js');
 
 (async function() {
@@ -38,9 +38,11 @@ app.get('/roboshop/contacts/', async(req, res) => {
 
     let match = {}; //{date: {$gte: new Date("2021-03-30 02:10:11.795Z")}}
 
-    if (lastDate != null) {
+    if (lastDate) {
         match = { date: { $gte: new Date(lastDate), $lt: currentDate } }; //between
     }
+
+    console.log(match)
 
     let result = await db.collection(col_name).aggregate([ //edit query
 
@@ -73,21 +75,21 @@ app.get("/roboshop/chat/userId/:userId/", async(req, res) => {
     let userId = req.params.userId;
     console.log("GET: /roboshop/chat/userId/" + userId + "?lastDateQuery=" + req.query.lastDateQuery + "&select=count");
 
-    if (req.query.lastDateQuery == 'null') {
-        let last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
-        match_date = { $gte: last30day, $lt: currentDate }
-    } else {
-        let lastDateQuery = new Date(req.query.lastDateQuery);
-        match_date = { $gte: lastDateQuery, $lt: currentDate }
-    }
-
-    // if (req.query.lastDateQuery) {
-    //     lastDateQuery = new Date(req.query.lastDateQuery);
-    //     match_date = { $gte: lastDateQuery, $lt: currentDate }
-    // } else {
-    //     last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
+    // if (req.query.lastDateQuery == 'null') {
+    //     let last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
     //     match_date = { $gte: last30day, $lt: currentDate }
+    // } else {
+    //     let lastDateQuery = new Date(req.query.lastDateQuery);
+    //     match_date = { $gte: lastDateQuery, $lt: currentDate }
     // }
+
+    if (req.query.lastDateQuery) {
+        lastDateQuery = new Date(req.query.lastDateQuery);
+        match_date = { $gte: lastDateQuery, $lt: currentDate }
+    } else {
+        last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
+        match_date = { $gte: last30day, $lt: currentDate }
+    }
 
     let result;
     let match = { "userId": userId, "date": match_date }

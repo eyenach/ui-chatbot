@@ -7,10 +7,14 @@ html
         script.
             $(document).ready(function(){
 
-                //- contact: {
-                //-     lastDateQuery: 2021-05-18T07:25:45.720Z,
-                //-     contact: [ 'shop1', 'nongeye', 'xxyyzz', 'weee', 'earth', 'fdwsfw' ]
-                //- }
+                getContact()
+
+            });
+
+
+            function getContact(){
+
+                let query_date = {};
 
                 let contact  = localStorage.getItem("contact");
                 let c_contact = null
@@ -24,17 +28,17 @@ html
 
                     if(getContactjs.lastDateQuery){
                         c_contact = getContactjs.lastDateQuery
+                        query_date = {"lastDateQuery" : c_contact}
                     }
                 }
 
 
-                $.ajax({url: "/roboshop/contacts/?lastDateQuery="+c_contact, success: function(result){ 
-
-
-                    //- contact: {
-                    //-     lastDateQuery: 2021-05-18T07:25:45.720Z,
-                    //-     contact: [ 'shop1', 'nongeye', 'xxyyzz', 'weee', 'earth', 'fdwsfw' ]
-                    //- }
+                
+                $.ajax({
+                    method:"get",
+                    url: "/roboshop/contacts/",
+                    data : query_date
+                    , success: function(result){ 
 
                     let getContact = localStorage.getItem("contact");
                     let fetch_contact = JSON.parse(getContact);
@@ -47,8 +51,12 @@ html
 
                     }else{
 
+                        let contact_fetch = fetch_contact.contact;
+
                         for(var i=0;i<result.contact.length;++i){
-                            fetch_contact.contact.push(result.contact[i])
+                            if(!contact_fetch.includes(result.contact[i])){
+                               contact_fetch.push(result.contact[i]) 
+                            }
                         }
 
                         let lastDate_result = result.lastDateQuery;
@@ -74,28 +82,33 @@ html
                     //-     localStorage.setItem("contact",JSON.stringify(contact_result)); 
                     //- }
 
-                    
+                
 
                     for(var i=0;i<fetch_contact.contact.length;++i){
 
                         let thisContact = fetch_contact.contact[i];
 
+                        query_date = {"lastDateQuery" : c_contact , "select" : "count"}
                         //ajax
-                        $.ajax({url: "/roboshop/chat/userId/"+thisContact+"/?lastDateQuery="+c_contact+"&select=count", success: function(result){
+                        $.ajax({
+                            method:"get",
+                            url: "/roboshop/chat/userId/"+thisContact,
+                            data: query_date, 
+                            success: function(result){
                             //doing here
 
-                            let count_unread = 0;
+                            let count_unread = "";
 
                             if(result.length == 0){
                                 console.log("count_unread undefined")
                             }else{
-                                count_unread = result[0].count
+                                count_unread = "("+result[0].count+")"
                                 console.log("count_unread ",result[0].count)
                             }
     
                             $('#contact').remove();
-                            //create div                                                                                                                               //+" ("+count_unread+")"
-                            $('#contact-line').append('<div id="'+ thisContact +'" class="user-list" onclick="logHistory(this.id)">'+ thisContact +" ("+count_unread+")"+'</div>');
+                            //create div                                                                                                                               
+                            $('#contact-line').append('<div id="'+ thisContact +'" class="user-list" onclick="logHistory(this.id)">'+ thisContact+" "+count_unread+'</div>');
                             console.log("result contact ",thisContact)
                             //- $('#contact').append('<div id="'+ result[i].userId+'" onclick="getChat('+result[i].displayName+')">'+ result[i].displayName +'</div>'); 
 
@@ -108,7 +121,10 @@ html
                   
 
                 }});
-            });
+
+
+
+            }
 
             function logHistory(id){
                 let chatlog;
