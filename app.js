@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-var path = require('path')
+    // var path = require('path')
 
 // connect database
 let db;
@@ -15,6 +15,11 @@ var dbF = require('./db.js');
 // view engine setup
 app.use(express.static('views'))
 app.set('view engine', 'jade')
+
+app.use(express.json());
+app.use(express.urlencoded({
+    extended: true
+}));
 
 // var indexRouter = require('./routes/index')
 // var roboRouter = require('./routes/roboshop')
@@ -71,23 +76,23 @@ app.get("/roboshop/chat/userId/:userId/", async(req, res) => {
     let currentDate = new Date();
     let match_date;
     let userId = req.params.userId;
-    console.log("GET: /roboshop/chat/userId/" + userId + "?lastDateQuery=" + req.query.lastDateQuery + "&select=count");
+    console.log("GET/ ", req.originalUrl);
 
-    if (req.query.lastDateQuery == 'null') {
-        let last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
-        match_date = { $gte: last30day, $lt: currentDate }
-    } else {
-        let lastDateQuery = new Date(req.query.lastDateQuery);
-        match_date = { $gte: lastDateQuery, $lt: currentDate }
-    }
-
-    // if (req.query.lastDateQuery) {
-    //     lastDateQuery = new Date(req.query.lastDateQuery);
-    //     match_date = { $gte: lastDateQuery, $lt: currentDate }
-    // } else {
-    //     last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
+    // if (req.query.lastDateQuery == 'null') {
+    //     let last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
     //     match_date = { $gte: last30day, $lt: currentDate }
+    // } else {
+    //     let lastDateQuery = new Date(req.query.lastDateQuery);
+    //     match_date = { $gte: lastDateQuery, $lt: currentDate }
     // }
+
+    if (req.query.lastDateQuery) {
+        lastDateQuery = new Date(req.query.lastDateQuery);
+        match_date = { $gte: lastDateQuery, $lt: currentDate }
+    } else {
+        last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
+        match_date = { $gte: last30day, $lt: currentDate }
+    }
 
     let result;
     let match = { "userId": userId, "date": match_date }
@@ -121,6 +126,38 @@ app.get("/roboshop/chat/userId/:userId/", async(req, res) => {
 
     res.json(result);
 })
+
+app.post("/roboshop/chat/userId/:userId/", async(req, res) => {
+    console.log("POST/ ", req.originalUrl);
+
+    let userId = req.params.userId;
+    let message = req.body.message;
+
+    res.json(message);
+
+    // pushMsg(userId, message);
+})
+
+const pushMsg = (to, msg) => {
+    const LINE_MESSAGING_API = 'https://api.line.me/v2/bot/message';
+    const LINE_HEADER = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer QtqkhC6GGUIPO4qbnFBtlM1q6hLGoPFQDZ2UxA70L6K6U+L9FpXtCPimMmuttasjM9YT+gs8JXcHYwiKN1uZ2cLBWgBZ1CVZyFvXkyyyc7UsQQbWi7tv7Xla09fb6omeut0aZMNDvCHrhB5eC/uO8QdB04t89/1O/w1cDnyilFU=`
+    };
+
+    return request({
+        method: 'POST',
+        uri: `${LINE_MESSAGING_API}/push`,
+        headers: LINE_HEADER,
+        body: JSON.stringify({
+            "to": to,
+            "messages": [{
+                "type": "text",
+                "text": msg
+            }]
+        })
+    });
+};
 
 app.listen(8080, () => { console.log(`Server is running on port : 8080`) })
 

@@ -124,7 +124,8 @@ html
                     if (chatlog) {
                         chatlog_parse = JSON.parse(chatlog);
                         chatlog_date = chatlog_parse.lastDateQuery;
-                        query_date = { "lastDateQuery": chatlog_date };
+                        //- query_date = { "lastDateQuery": chatlog_date };
+                        query_date.lastDateQuery = chatlog_date;
                         if (chatlog_parse.chats){
                             chatlog_chat = chatlog_parse.chats;
                         }
@@ -281,6 +282,30 @@ html
                         }
                     }
                 });
+
+                $("#send").remove();
+                $("#send-line").append('<div id="send" class="message"></div>');
+                $("#send").append('<textarea id="message"></textarea>');
+                $("#send").append('<input id="' + id + '" type="submit" onclick="sendMessage(this.id)" value="send">');
+
+            }
+
+            function sendMessage(id){
+                let message = document.getElementById("message").value;
+                let data = { "message": message };
+                $.ajax({
+                    type:"post",
+                    url:'/roboshop/chat/userId/' + id,
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    success:function(response){
+                        alert("message: " + response);
+                    }
+                });
+                //- $.post("/roboshop/chat/userId/" + id, data,
+                //- function(data,status){
+                //-     alert("Data: " + data + "\nStatus: " + status);
+                //- });
             }
     body
         div(class="container")
@@ -289,13 +314,15 @@ html
                 div(class="user-list user-tag") contacts
                 div(id="contact-line")
                     //- CONTACT LINE HERE
-                    div(id="contact" class="user-list" onClick="logHistory(this.id)")
+                    div(id="contact")
+                    //- div(id="contact" class="user-list" onClick="logHistory(this.id)")
 
             div(class="chat")
                 div(class="log scrollbar-log")
                     div(id="flex-line" class="chatbox")
                         //- FLEX LINE HERE
                         div(id="flex")
-                div(class="message")
-                    textarea
-                    div(class="send") send
+                div(id="send-line" class="message")
+                    div(id="send" class="message")
+                        //- textarea(id="message")
+                        //- input(type="submit" onclick="sendMessage()" value="send")
