@@ -43,9 +43,11 @@ app.get('/roboshop/contacts/', async(req, res) => {
 
     let match = {}; //{date: {$gte: new Date("2021-03-30 02:10:11.795Z")}}
 
-    if (lastDate != null) {
+    if (lastDate) {
         match = { date: { $gte: new Date(lastDate), $lt: currentDate } }; //between
     }
+
+    console.log(match)
 
     let result = await db.collection(col_name).aggregate([ //edit query
 
