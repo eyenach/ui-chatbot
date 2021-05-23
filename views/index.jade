@@ -11,122 +11,125 @@ html
 
             });
 
-
-            function getContact(){
-
-                let query_date = {};
-
-                let contact  = localStorage.getItem("contact");
-                let c_contact = null
-
-                if(contact){ //check get contact
-
-                   let getContact = localStorage.getItem("contact");
-                   let getContactjs =  JSON.parse(getContact);
-
-                   console.log("json ",getContactjs)
-
-                    if(getContactjs.lastDateQuery){
-                        c_contact = getContactjs.lastDateQuery
-                        query_date = {"lastDateQuery" : c_contact}
+            function getChatLog(id) {
+                let last_date;
+                let chatlog, chatlog_parse, chatlog_date;
+                if (typeof(Storage) == "undefined") {
+                    alert("Sorry, your browser does not support Web Storage...")
+                } else {
+                    //- chatlog_$id = { lastDateQuery, chats }
+                    chatlog = localStorage.getItem("chatlog_" + id);
+                    if (chatlog) {
+                        chatlog_parse = JSON.parse(chatlog);
+                        chatlog_date = chatlog_parse.lastDateQuery;
+                        last_date = chatlog_date;
                     }
+                    console.log("getChatLog: ", id, " = ", last_date);
+                    return last_date
                 }
+            }
 
+            function getContact(id){
+                if (id) {
+                    let query_date = {};
+                    let chatlog_date = getChatLog(id);
 
-                
-                $.ajax({
-                    method:"get",
-                    url: "/roboshop/contacts/",
-                    data : query_date
-                    , success: function(result){ 
+                    query_date.lastDateQuery = chatlog_date;
+                    query_date.select = "count";
 
-                    let getContact = localStorage.getItem("contact");
-                    let fetch_contact = JSON.parse(getContact);
+                    $.ajax({
+                        method:"get",
+                        url: "/roboshop/chat/userId/"+ id,
+                        data: query_date, 
+                        success: function(result){
 
-                
-                    if(!fetch_contact){
-
-                        fetch_contact = result
-                        localStorage.setItem("contact",JSON.stringify(fetch_contact)); 
-
-                    }else{
-
-                        let contact_fetch = fetch_contact.contact;
-
-                        for(var i=0;i<result.contact.length;++i){
-                            if(!contact_fetch.includes(result.contact[i])){
-                               contact_fetch.push(result.contact[i]) 
+                            if (result.length == 0) {
+                                $("#noti_" + id).remove();
+                                console.log("remove div noti_", id)
                             }
                         }
+                    });
+                } else {
+                    let query_date = {};
+                    let contact, contact_parse, contact_date, contact_user;
 
-                        let lastDate_result = result.lastDateQuery;
-                        let final_result = { "lastDateQuery": lastDate_result , "contact" : fetch_contact.contact } ; 
-
-                        localStorage.setItem("contact",JSON.stringify(final_result)); 
-
-                        console.log("final ",JSON.parse(localStorage.getItem("contact")))
+                    contact  = localStorage.getItem("contact");
+                    if (contact) { //check get contact
+                        contact_parse =  JSON.parse(contact);
+                        if(contact_parse.lastDateQuery){
+                            contact_date = contact_parse.lastDateQuery
+                            query_date.lastDateQuery = contact_date
+                        }
                     }
 
+                    $.ajax({
+                        method:"get",
+                        url: "/roboshop/contacts/",
+                        data : query_date,
+                        success: function(result){ 
 
-                    
+                            if (!contact) {
+                                contact_user = result.contact;
+                                localStorage.setItem("contact", JSON.stringify(result));
+                                console.log("set item no log");
+                            } else {
+                                contact_user = contact_parse.contact;
+                                console.log("contact_user: ", contact_user.length);
 
+                                for(var i=0; i<result.contact.length; ++i){
+                                    if(!contact_user.includes(result.contact[i])){
+                                        contact_user.push(result.contact[i]) 
+                                    }
+                                }
 
+                                let lastDate_result = result.lastDateQuery;
+                                let final_result = { "lastDateQuery": lastDate_result , "contact" : contact_user } ; 
 
-
-                    //- let contact_result = result.contact;
-                    //- console.log("contact_result ",contact_result)
-
-                    //- if (contact_result.contact.length == 0){
-                    //-     localStorage.setItem("contact")
-                    //- } else {
-                    //-     localStorage.setItem("contact",JSON.stringify(contact_result)); 
-                    //- }
-
-                
-
-                    for(var i=0;i<fetch_contact.contact.length;++i){
-
-                        let thisContact = fetch_contact.contact[i];
-
-                        query_date = {"lastDateQuery" : c_contact , "select" : "count"}
-                        //ajax
-                        $.ajax({
-                            method:"get",
-                            url: "/roboshop/chat/userId/"+thisContact,
-                            data: query_date, 
-                            success: function(result){
-                            //doing here
-
-                            let count_unread = "";
-
-                            if(result.length == 0){
-                                console.log("count_unread undefined")
-                            }else{
-                                count_unread = "("+result[0].count+")"
-                                console.log("count_unread ",result[0].count)
+                                localStorage.setItem("contact", JSON.stringify(final_result));
+                                console.log("set item add log");
                             }
-    
+
+                            console.log("final ",JSON.parse(localStorage.getItem("contact")));
+                            let contacts = JSON.parse(localStorage.getItem("contact"));
+
+                            //- call count unread message
                             $('#contact').remove();
-                            //create div                                                                                                                               
-                            $('#contact-line').append('<div id="'+ thisContact +'" class="user-list" onclick="logHistory(this.id)">'+ thisContact+" "+count_unread+'</div>');
-                            console.log("result contact ",thisContact)
-                            //- $('#contact').append('<div id="'+ result[i].userId+'" onclick="getChat('+result[i].displayName+')">'+ result[i].displayName +'</div>'); 
+                            $('#contact-line').append('<div id="contact"></div>');
+                            for(var i=0; i<contacts.contact.length; ++i){
 
-                        }});
-                        
-                       
- 
-                    }
-
-                  
-
-                }});
-
-
-
+                                let userId = contacts.contact[i];
+                                let chatlog_date = getChatLog(userId);
+                                let query_select = {"lastDateQuery" : chatlog_date, "select" : "count"}
+                                
+                                $.ajax({
+                                    method:"get",
+                                    url: "/roboshop/chat/userId/"+ userId,
+                                    data: query_select, 
+                                    success: function(result){
+                                    
+                                        let count_unread = 0;
+                                        if (result.length > 0) {
+                                            count_unread = result[0].count;
+                                        }
+                                        console.log("count_unread: ", count_unread)
+                
+                                        //- create div                                                                                                                               
+                                        $('#contact').append('<div id="' + userId + '"class="user-list" onclick="logHistory(this.id)"></div>');
+                                        $('#' + userId).append('<img src="https://static.trueplookpanya.com/tppy/member/m_545000_547500/545920/cms/images/%E0%B8%9A%E0%B8%B4%E0%B8%A7%E0%B8%81%E0%B8%B4%E0%B9%89%E0%B8%9902.jpg">');
+                                        $('#' + userId).append('<div id="display_' + userId + '" class="user-name">' + userId + '</div>');
+                                        if (count_unread != 0) {
+                                            $('#' + userId).append('<div id="noti_' + userId + '" class="notification">' + count_unread + '</div>');
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
             }
 
             function logHistory(id){
+
                 let chatlog;
                 let chatlog_date = null
                 let chatlog_chat = [];
@@ -140,7 +143,6 @@ html
                     if (chatlog) {
                         chatlog_parse = JSON.parse(chatlog);
                         chatlog_date = chatlog_parse.lastDateQuery;
-                        //- query_date = { "lastDateQuery": chatlog_date };
                         query_date.lastDateQuery = chatlog_date;
                         if (chatlog_parse.chats){
                             chatlog_chat = chatlog_parse.chats;
@@ -296,6 +298,8 @@ html
                                 $("#flex").append('<div id="date" class="LySlider timeSent-ltr">' + time + '</div><br><br>');
                             }
                         }
+                        console.log("refresh contact");
+                        getContact(id);
                     }
                 });
 
@@ -303,7 +307,6 @@ html
                 $("#send-line").append('<div id="send" class="message"></div>');
                 $("#send").append('<textarea id="message"></textarea>');
                 $("#send").append('<input id="' + id + '" type="submit" onclick="sendMessage(this.id)" value="send">');
-
             }
 
             function sendMessage(id){
@@ -322,12 +325,15 @@ html
     body
         div(class="container")
 
-            div(id="people" class="user scrollbar-user")
+            div(class="user scrollbar-user")
                 div(class="user-list user-tag") contacts
                 div(id="contact-line")
                     //- CONTACT LINE HERE
                     div(id="contact")
-                    //- div(id="contact" class="user-list" onClick="logHistory(this.id)")
+                    //- div(id="test" class="user-list")
+                    //-     img(src="https://static.trueplookpanya.com/tppy/member/m_545000_547500/545920/cms/images/%E0%B8%9A%E0%B8%B4%E0%B8%A7%E0%B8%81%E0%B8%B4%E0%B9%89%E0%B8%9902.jpg")
+                    //-     div(id="display_userId" class="user-name") display name
+                    //-     div(class="notification") 3
 
             div(class="chat")
                 div(class="log scrollbar-log")

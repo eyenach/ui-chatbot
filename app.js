@@ -80,14 +80,6 @@ app.get("/roboshop/chat/userId/:userId/", async(req, res) => {
     let userId = req.params.userId;
     console.log("GET/ ", req.originalUrl);
 
-    // if (req.query.lastDateQuery == 'null') {
-    //     let last30day = new Date(currentDate - 60 * 60 * 24 * 30 * 1000);
-    //     match_date = { $gte: last30day, $lt: currentDate }
-    // } else {
-    //     let lastDateQuery = new Date(req.query.lastDateQuery);
-    //     match_date = { $gte: lastDateQuery, $lt: currentDate }
-    // }
-
     if (req.query.lastDateQuery) {
         lastDateQuery = new Date(req.query.lastDateQuery);
         match_date = { $gte: lastDateQuery, $lt: currentDate }
